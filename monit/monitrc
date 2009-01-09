@@ -1,0 +1,34 @@
+#Monit script for the Adhearsion Sandbox
+
+set daemon 120
+set logfile /var/log/monit.log
+set alert sandbox@adhearsion.com
+
+set mailserver localhost with timeout 15 seconds
+set mailfrom monit@adhearsion.com
+set mailsubject "Alert from Sandbox"
+
+set httpd port 9111
+  allow localhost
+
+check process asterisk with pidfile /var/run/asterisk/asterisk.pid
+  group asterisk
+  start program = "/etc/init.d/asterisk start"
+  stop program = "/etc/init.d/asterisk stop"
+  if cpu usage > 10% then alert
+  if mem usage > 20% then alert
+  if 5 restarts within 5 cycles then alert
+  alert sandbox@adhearsion.com on { change checksum data exec gid icmp invalid
+                                    match nonexist permission size timeout timestamp }
+                                    match nonexist permission size timeout timestamp }
+
+check process ahn with pidfile /var/run/sandbox/adhearsion.pid
+  group sandbox
+  depends on asterisk
+  start program = "/etc/init.d/ahn start"
+  stop  program = "/etc/init.d/ahn stop"
+  if cpu usage > 10% then alert
+  if mem usage > 20% then alert
+  if 5 restarts within 5 cycles then alert
+  alert sandbox@adhearsion.com on { change checksum data exec gid icmp invalid
+                                    match nonexist permission size timeout timestamp }

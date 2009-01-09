@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+# bls           This is a startup script for use in /etc/init.d 
+# chkconfig:    2345 90 20 
+# description:  Used to start and stop Adhearsion daemons
+
+APP_NAME = "ahn"
+@default_options = {
+  :name => 'twinners', 
+  :app_dir => '/opt/interactivechatsystems/twinners',
+  :pid_file => '/var/run/interactivechatsystems/adhearsion.pid' 
+}
+#ENV['PATH'] += ':/usr/bin:/opt/interactivechatsystems/adhearsion/bin'
+
+def start_app
+  puts "Starting #{@default_options[:name]}"
+  #system("/usr/bin/ruby /opt/interactivechatsystems/adhearsion/bin/ahnctl #{cmd} #{project[:app_dir]} --pid-file=#{project[:pid_file]} &")
+  system("/usr/bin/ruby /opt/interactivechatsystems/adhearsion/bin/ahn start #{@default_options[:app_dir]} 2>&1 >> /dev/null & echo $! > #{@default_options[:pid_file]} &")
+end
+
+def stop_app
+  pid = File.read(@default_options[:pid_file])
+  puts "Stopping #{APP_NAME} with pid #{pid}"
+  begin
+  	Process.kill(9, pid.to_i)
+  rescue => err
+	puts err
+  end
+end
+
+case ARGV.first
+  #when 'status'
+	#TBD
+	#puts "Status of #{APP_NAME} is unknown"
+  when 'start'
+	  start_app 
+  when 'stop'
+	  stop_app 
+  when 'restart'
+    stop_app
+    start_app 
+end 
+
+unless %w{start stop restart}.include? ARGV.first
+  puts "Usage: #{APP_NAME} {start|stop|restart}"
+  exit
+end
